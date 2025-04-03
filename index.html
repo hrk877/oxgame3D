@@ -16,8 +16,8 @@
       --win-color: #00c853;
       --text-light: #ffffff;
       --border-radius: 12px;
-      --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.1);
-      --shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.25);
+      --shadow-subtle: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-strong: 0 8px 24px rgba(0,0,0,0.25);
       --transition-time: 0.3s;
     }
     @font-face {
@@ -84,9 +84,9 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      transition: all 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-      z-index: 10;
       padding: 20px;
+      transition: all var(--transition-time) ease;
+      z-index: 10;
     }
     .screen.active {
       display: flex;
@@ -112,7 +112,7 @@
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 5px 15px rgba(98, 0, 234, 0.3);
+      text-shadow: 0 5px 15px rgba(98,0,234,0.3);
       position: relative;
       letter-spacing: 3px;
     }
@@ -137,7 +137,7 @@
       cursor: pointer;
       background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
       color: var(--text-light);
-      box-shadow: 0 0 15px var(--primary-color), 0 0 30px rgba(98, 0, 234, 0.5);
+      box-shadow: 0 0 15px var(--primary-color), 0 0 30px rgba(98,0,234,0.5);
       transition: all var(--transition-time) ease;
       position: relative;
       overflow: hidden;
@@ -151,25 +151,25 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
       transition: 0.5s;
     }
     .glowing-btn:hover {
       transform: translateY(-5px) scale(1.05);
-      box-shadow: 0 0 20px var(--primary-color), 0 0 40px rgba(98, 0, 234, 0.7);
+      box-shadow: 0 0 20px var(--primary-color), 0 0 40px rgba(98,0,234,0.7);
     }
     .glowing-btn:hover::before {
       left: 100%;
     }
     /* ゲーム画面 */
     #gameScreen {
-      width: 95%;
+      width: 100%;
       max-width: 900px;
       padding: 20px;
       background: var(--surface-color);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-strong);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.1);
       overflow-y: auto;
       margin: 0 auto;
       transform-style: preserve-3d;
@@ -181,10 +181,10 @@
       align-items: center;
       margin-bottom: 20px;
       padding: 15px;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255,255,255,0.05);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-subtle);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.1);
       width: 100%;
     }
     .game-info::before {
@@ -227,9 +227,9 @@
       font-size: 1.2em;
       font-weight: bold;
       padding: 8px 15px;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0,0,0,0.3);
       border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.1);
     }
     /* 盤面＆レイヤー表示 */
     .board-container {
@@ -239,28 +239,29 @@
       width: 100%;
     }
     .board-wrapper {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255,255,255,0.05);
       padding: 15px;
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-subtle);
       transition: all var(--transition-time) ease;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.1);
     }
     .board-wrapper:hover {
       transform: translateY(-5px) rotateX(5deg);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
-    /* 盤面自体は固定サイズ（正方形）に */
+    /* 盤面：幅は90vwのうち max-width を設定、aspect-ratio で正方形に */
     .board {
+      width: 90vw;
+      max-width: 350px;
+      aspect-ratio: 1 / 1;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      width: 264px; /* 4×60 + 3×8 */
-      height: 264px;
-      margin: 0 auto;
-      background: rgba(0, 0, 0, 0.3);
+      gap: 4%;
+      background: rgba(0,0,0,0.3);
       border-radius: var(--border-radius);
       position: relative;
+      margin: 0 auto;
     }
     .board::before {
       content: '';
@@ -274,21 +275,21 @@
       opacity: 0.05;
       z-index: -1;
     }
+    /* セルは自動で正方形に（aspect-ratio プロパティ） */
     .cell {
-      width: 60px;
-      height: 60px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
       border-radius: 8px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 28px;
+      font-size: 5vw;
       font-weight: bold;
       cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+      transition: all 0.25s cubic-bezier(0.17,0.67,0.83,0.67);
       position: relative;
       overflow: hidden;
+      aspect-ratio: 1 / 1;
     }
     .cell::after {
       content: '';
@@ -297,14 +298,14 @@
       height: 100%;
       top: 0;
       left: 0;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
     .cell:hover {
       transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      background: rgba(255,255,255,0.1);
     }
     .cell:hover::after {
       opacity: 1;
@@ -346,17 +347,17 @@
       border: none;
       border-radius: var(--border-radius);
       cursor: pointer;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255,255,255,0.05);
       color: var(--text-light);
       box-shadow: var(--shadow-subtle);
       transition: all var(--transition-time) ease;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.1);
       letter-spacing: 1px;
     }
     .control-btn:hover {
       background: var(--primary-color);
       transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(98, 0, 234, 0.5);
+      box-shadow: 0 5px 15px rgba(98,0,234,0.5);
     }
     .reset-btn {
       border-left: 3px solid var(--secondary-color);
@@ -366,7 +367,7 @@
     }
     /* 勝利画面 */
     #winScreen {
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0,0,0,0.85);
       z-index: 20;
       backdrop-filter: blur(10px);
     }
@@ -377,8 +378,8 @@
       text-align: center;
       max-width: 90%;
       box-shadow: var(--shadow-strong);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      animation: appear 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+      border: 1px solid rgba(255,255,255,0.1);
+      animation: appear 0.5s ease;
     }
     @keyframes appear {
       0% { transform: scale(0.8) translateY(50px); opacity: 0; }
@@ -407,29 +408,7 @@
       margin-bottom: 20px;
       opacity: 0.9;
     }
-    /* レスポンシブ対応 */
-    @media (max-width: 768px) {
-      #titleScreen h1 {
-        font-size: 3.8em;
-      }
-      .glowing-btn {
-        padding: 14px 40px;
-        font-size: 1.3em;
-      }
-      .game-info {
-        flex-direction: column;
-        gap: 10px;
-      }
-      .board {
-        width: 220px;
-        height: 220px;
-      }
-      .cell {
-        width: 55px;
-        height: 55px;
-        font-size: 24px;
-      }
-    }
+    /* メディアクエリ：スマホ向けにさらに調整 */
     @media (max-width: 480px) {
       #titleScreen h1 {
         font-size: 3em;
@@ -438,14 +417,21 @@
         padding: 12px 30px;
         font-size: 1.2em;
       }
-      .board {
-        width: 200px;
-        height: 200px;
+      .player-turn {
+        font-size: 1.3em;
       }
-      .cell {
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
+      #moveCount {
+        font-size: 1em;
+      }
+      .control-btn {
+        font-size: 1em;
+        padding: 8px 16px;
+      }
+      .win-message h2 {
+        font-size: 2em;
+      }
+      .winner-icon {
+        font-size: 4em;
       }
     }
   </style>
@@ -453,7 +439,7 @@
 <body>
   <div class="background-animation"></div>
   
-  <!-- タイトル画面（説明文は削除） -->
+  <!-- タイトル画面 -->
   <div id="titleScreen" class="screen active">
     <div class="title-container">
       <h1>OXGame3D</h1>
@@ -496,7 +482,7 @@
     let gameActive = false;
     let winningCells = [];
 
-    // 各レイヤーを2D盤として管理する：gameBoard[z][x][y]
+    // 各レイヤーを 2D盤として管理：gameBoard[z][x][y]
     function createEmptyBoard() {
       return Array.from({ length: boardSize }, () =>
         Array.from({ length: boardSize }, () =>
@@ -504,7 +490,6 @@
         )
       );
     }
-
     function startGame() {
       document.getElementById('titleScreen').classList.remove('active');
       document.getElementById('gameScreen').classList.add('active');
@@ -527,7 +512,7 @@
       createBoard();
       document.getElementById('winScreen').classList.remove('active');
     }
-    // 各レイヤーごとに盤面を作成（ループ順は z → x → y）
+    // 各レイヤーごとに盤面を作成（z→x→yの順）
     function createBoard() {
       const gameArea = document.getElementById('gameArea');
       gameArea.innerHTML = '';
@@ -544,7 +529,6 @@
         board.classList.add('board');
         board.setAttribute('data-layer', z);
         
-        // 行（x）と列（y）の順でセルを作成
         for (let x = 0; x < boardSize; x++) {
           for (let y = 0; y < boardSize; y++) {
             const cell = document.createElement('div');
@@ -564,7 +548,6 @@
     // プレイヤーの手の処理：gameBoard[z][x][y] にセット
     function makeMove(x, y, z) {
       if (!gameActive || gameBoard[z][x][y]) return;
-      
       gameBoard[z][x][y] = currentPlayer;
       moveCount++;
       
@@ -572,9 +555,7 @@
       const board = document.querySelector(`.board[data-layer="${z}"]`);
       const cell = board.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-z="${z}"]`);
       cell.style.transform = 'scale(1.2)';
-      setTimeout(() => {
-        cell.style.transform = 'scale(1)';
-      }, 200);
+      setTimeout(() => { cell.style.transform = 'scale(1)'; }, 200);
       
       updateBoard();
       updateMoveCount();
@@ -599,10 +580,10 @@
     function updateMoveCount() {
       document.getElementById('moveCount').textContent = `手数: ${moveCount}`;
     }
-    // 各盤面（レイヤー）のセル更新（gameBoard[z][x][y] から値を反映）
+    // 各盤面（レイヤー）のセル更新：gameBoard[z][x][y] を反映
     function updateBoard() {
       const boards = document.querySelectorAll('.board');
-      boards.forEach((board) => {
+      boards.forEach(board => {
         const z = parseInt(board.getAttribute('data-layer'));
         const cells = board.querySelectorAll('.cell');
         let index = 0;
@@ -620,15 +601,14 @@
         }
       });
     }
-    // 勝利判定：座標は (z, x, y) の順
+    // 勝利判定（座標は z,x,y の順）
     function checkWin() {
-      // 各方向（dz, dx, dy）を定義
       const directions = [
-        [0, 0, 1],   // 横（同レイヤー、列方向）
-        [0, 1, 0],   // 縦（同レイヤー、行方向）
-        [0, 1, 1],   // 同レイヤー斜め右下
-        [0, 1, -1],  // 同レイヤー斜め左下
-        [1, 0, 0],   // レイヤー間（同じ行・列）
+        [0, 0, 1],    // 横（同レイヤー列方向）
+        [0, 1, 0],    // 縦（同レイヤー行方向）
+        [0, 1, 1],    // 同レイヤー斜め右下
+        [0, 1, -1],   // 同レイヤー斜め左下
+        [1, 0, 0],    // レイヤー間（同じ行・列）
         [1, 0, 1],
         [1, 1, 0],
         [1, 1, 1],
@@ -649,8 +629,7 @@
                   const nz = z + dz * i;
                   const nx = x + dx * i;
                   const ny = y + dy * i;
-                  if (nz < 0 || nz >= boardSize || nx < 0 || nx >= boardSize || ny < 0 || ny >= boardSize)
-                    break;
+                  if (nz < 0 || nz >= boardSize || nx < 0 || nx >= boardSize || ny < 0 || ny >= boardSize) break;
                   if (gameBoard[nz][nx][ny] === symbol) {
                     count++;
                     cells.push({ z: nz, x: nx, y: ny });
@@ -702,7 +681,7 @@
       winMessage.textContent = '勝者はいません。もう一度挑戦しましょう！';
       winScreen.classList.add('active');
     }
-    // キーボード操作（Enter/Spaceでセルを選択）
+    // キーボード操作（Enter/Space でセルを選択）
     document.addEventListener('keydown', function(e) {
       if (!gameActive) return;
       if (e.key === 'Enter' || e.key === ' ') {
