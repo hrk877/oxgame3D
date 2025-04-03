@@ -20,29 +20,28 @@
       --shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.25);
       --transition-time: 0.3s;
     }
-
     @font-face {
       font-family: 'Orbitron';
       src: url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
       font-display: swap;
     }
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     body {
       font-family: 'Orbitron', sans-serif;
       background: var(--dark-bg);
       color: var(--text-light);
-      padding: 20px;
-      /* 背景は固定 */
-      position: relative;
       min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      perspective: 1000px;
+      overflow-x: hidden;
     }
-
     /* 3D背景アニメーション */
     .background-animation {
       position: fixed;
@@ -73,27 +72,27 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
-    /* 画面切替用 ※position: fixed を解除して通常フローに */
+    /* 画面切替用 */
     .screen {
       width: 100%;
       max-width: 1000px;
-      margin: 40px auto; /* 上下に余白を持たせる */
-      padding: 20px;
-      min-height: calc(100vh - 80px);
+      min-height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
       display: none;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       transition: all 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+      z-index: 10;
+      padding: 20px;
     }
     .screen.active {
       display: flex;
     }
-
     /* タイトル画面 */
     #titleScreen {
-      background: transparent;
       text-align: center;
       border-radius: var(--border-radius);
     }
@@ -162,20 +161,22 @@
     .glowing-btn:hover::before {
       left: 100%;
     }
-
     /* ゲーム画面 */
     #gameScreen {
-      width: 100%;
+      width: 95%;
       max-width: 900px;
       padding: 20px;
       background: var(--surface-color);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-strong);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow-y: auto;
+      margin: 0 auto;
       transform-style: preserve-3d;
     }
     .game-info {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
@@ -183,7 +184,6 @@
       background: rgba(255, 255, 255, 0.05);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-subtle);
-      position: relative;
       border: 1px solid rgba(255, 255, 255, 0.1);
       width: 100%;
     }
@@ -231,16 +231,7 @@
       border-radius: 20px;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
-
-    /* 盤面とレイヤーラベル */
-    .layer-label {
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: var(--secondary-color);
-      font-size: 1.2em;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
+    /* 盤面＆レイヤー表示 */
     .board-container {
       display: flex;
       flex-direction: column;
@@ -253,21 +244,22 @@
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-subtle);
       transition: all var(--transition-time) ease;
-      transform-style: preserve-3d;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
     .board-wrapper:hover {
       transform: translateY(-5px) rotateX(5deg);
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
+    /* 盤面自体は固定サイズ（正方形）に */
     .board {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 8px;
-      padding: 10px;
+      width: 264px; /* 4×60 + 3×8 */
+      height: 264px;
+      margin: 0 auto;
       background: rgba(0, 0, 0, 0.3);
       border-radius: var(--border-radius);
-      box-shadow: var(--shadow-subtle);
       position: relative;
     }
     .board::before {
@@ -339,7 +331,6 @@
     .taken {
       pointer-events: none;
     }
-
     /* 制御ボタン */
     .controls {
       display: flex;
@@ -373,22 +364,18 @@
     .title-btn {
       border-left: 3px solid var(--accent-color);
     }
-
     /* 勝利画面 */
     #winScreen {
       background: rgba(0, 0, 0, 0.85);
+      z-index: 20;
       backdrop-filter: blur(10px);
-      width: 100%;
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 20px;
     }
     .win-message {
       background: var(--surface-color);
       padding: 30px;
       border-radius: var(--border-radius);
       text-align: center;
-      max-width: 100%;
+      max-width: 90%;
       box-shadow: var(--shadow-strong);
       border: 1px solid rgba(255, 255, 255, 0.1);
       animation: appear 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
@@ -420,7 +407,6 @@
       margin-bottom: 20px;
       opacity: 0.9;
     }
-
     /* レスポンシブ対応 */
     @media (max-width: 768px) {
       #titleScreen h1 {
@@ -435,12 +421,12 @@
         gap: 10px;
       }
       .board {
-        gap: 6px;
-        padding: 8px;
+        width: 220px;
+        height: 220px;
       }
       .cell {
-        width: 50px;
-        height: 50px;
+        width: 55px;
+        height: 55px;
         font-size: 24px;
       }
     }
@@ -452,9 +438,13 @@
         padding: 12px 30px;
         font-size: 1.2em;
       }
+      .board {
+        width: 200px;
+        height: 200px;
+      }
       .cell {
-        width: 42px;
-        height: 42px;
+        width: 50px;
+        height: 50px;
         font-size: 20px;
       }
     }
@@ -463,14 +453,14 @@
 <body>
   <div class="background-animation"></div>
   
-  <!-- タイトル画面 -->
+  <!-- タイトル画面（説明文は削除） -->
   <div id="titleScreen" class="screen active">
     <div class="title-container">
       <h1>OXGame3D</h1>
       <button class="glowing-btn" onclick="startGame()">PLAY</button>
     </div>
   </div>
-
+  
   <!-- ゲーム画面 -->
   <div id="gameScreen" class="screen">
     <div class="game-info">
@@ -480,15 +470,13 @@
       </div>
       <div id="moveCount">手数: 0</div>
     </div>
-    
     <div class="board-container" id="gameArea"></div>
-    
     <div class="controls">
       <button class="control-btn reset-btn" onclick="resetGame()">リセット</button>
       <button class="control-btn title-btn" onclick="backToTitle()">タイトルへ</button>
     </div>
   </div>
-
+  
   <!-- 勝利画面 -->
   <div id="winScreen" class="screen">
     <div class="win-message">
@@ -499,7 +487,7 @@
       <button class="control-btn title-btn" onclick="backToTitle()">タイトルへ</button>
     </div>
   </div>
-
+  
   <script>
     const boardSize = 4;
     let currentPlayer = '〇';
@@ -508,7 +496,7 @@
     let gameActive = false;
     let winningCells = [];
 
-    // 空の4×4×4ボードを作成
+    // 各レイヤーを2D盤として管理する：gameBoard[z][x][y]
     function createEmptyBoard() {
       return Array.from({ length: boardSize }, () =>
         Array.from({ length: boardSize }, () =>
@@ -517,20 +505,17 @@
       );
     }
 
-    // 画面切替＆ゲーム開始
     function startGame() {
       document.getElementById('titleScreen').classList.remove('active');
       document.getElementById('gameScreen').classList.add('active');
       document.getElementById('winScreen').classList.remove('active');
       resetGame();
     }
-
     function backToTitle() {
       document.getElementById('gameScreen').classList.remove('active');
       document.getElementById('winScreen').classList.remove('active');
       document.getElementById('titleScreen').classList.add('active');
     }
-
     function resetGame() {
       gameBoard = createEmptyBoard();
       currentPlayer = '〇';
@@ -542,8 +527,7 @@
       createBoard();
       document.getElementById('winScreen').classList.remove('active');
     }
-
-    // 各レイヤーの盤面を作成
+    // 各レイヤーごとに盤面を作成（ループ順は z → x → y）
     function createBoard() {
       const gameArea = document.getElementById('gameArea');
       gameArea.innerHTML = '';
@@ -560,6 +544,7 @@
         board.classList.add('board');
         board.setAttribute('data-layer', z);
         
+        // 行（x）と列（y）の順でセルを作成
         for (let x = 0; x < boardSize; x++) {
           for (let y = 0; y < boardSize; y++) {
             const cell = document.createElement('div');
@@ -567,24 +552,23 @@
             cell.setAttribute('data-x', x);
             cell.setAttribute('data-y', y);
             cell.setAttribute('data-z', z);
-            cell.setAttribute('aria-label', `位置 x:${x+1}, y:${y+1}, z:${z+1}`);
+            cell.setAttribute('aria-label', `位置: レイヤー${z+1} 行${x+1} 列${y+1}`);
             cell.addEventListener('click', () => makeMove(x, y, z));
             board.appendChild(cell);
           }
         }
-        
         boardWrapper.appendChild(board);
         gameArea.appendChild(boardWrapper);
       }
     }
-
-    // プレイヤーの手処理
+    // プレイヤーの手の処理：gameBoard[z][x][y] にセット
     function makeMove(x, y, z) {
-      if (!gameActive || gameBoard[x][y][z]) return;
+      if (!gameActive || gameBoard[z][x][y]) return;
       
-      gameBoard[x][y][z] = currentPlayer;
+      gameBoard[z][x][y] = currentPlayer;
       moveCount++;
       
+      // エフェクト
       const board = document.querySelector(`.board[data-layer="${z}"]`);
       const cell = board.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-z="${z}"]`);
       cell.style.transform = 'scale(1.2)';
@@ -606,19 +590,16 @@
         updatePlayerTurn();
       }
     }
-
     function updatePlayerTurn() {
       const playerIcon = document.getElementById('playerIcon');
       playerIcon.textContent = currentPlayer;
       playerIcon.className = 'player-icon';
       playerIcon.classList.add(currentPlayer === '〇' ? 'player-o' : 'player-x');
     }
-
     function updateMoveCount() {
       document.getElementById('moveCount').textContent = `手数: ${moveCount}`;
     }
-
-    // 盤面更新
+    // 各盤面（レイヤー）のセル更新（gameBoard[z][x][y] から値を反映）
     function updateBoard() {
       const boards = document.querySelectorAll('.board');
       boards.forEach((board) => {
@@ -628,7 +609,7 @@
         for (let x = 0; x < boardSize; x++) {
           for (let y = 0; y < boardSize; y++) {
             const cell = cells[index++];
-            const value = gameBoard[x][y][z];
+            const value = gameBoard[z][x][y];
             cell.textContent = value || '';
             cell.classList.remove('o', 'x', 'taken', 'winning');
             if (value) {
@@ -639,33 +620,40 @@
         }
       });
     }
-
-    // 勝利判定
+    // 勝利判定：座標は (z, x, y) の順
     function checkWin() {
+      // 各方向（dz, dx, dy）を定義
       const directions = [
-        [1, 0, 0], [0, 1, 0],
-        [0, 0, 1],
-        [1, 1, 0], [1, -1, 0],
-        [1, 0, 1], [0, 1, 1],
-        [1, 1, 1], [1, -1, 1], [-1, 1, 1], [-1, -1, 1]
+        [0, 0, 1],   // 横（同レイヤー、列方向）
+        [0, 1, 0],   // 縦（同レイヤー、行方向）
+        [0, 1, 1],   // 同レイヤー斜め右下
+        [0, 1, -1],  // 同レイヤー斜め左下
+        [1, 0, 0],   // レイヤー間（同じ行・列）
+        [1, 0, 1],
+        [1, 1, 0],
+        [1, 1, 1],
+        [1, 1, -1],
+        [1, -1, 0],
+        [1, -1, 1],
+        [1, -1, -1]
       ];
-
-      for (let x = 0; x < boardSize; x++) {
-        for (let y = 0; y < boardSize; y++) {
-          for (let z = 0; z < boardSize; z++) {
-            if (gameBoard[x][y][z]) {
-              const symbol = gameBoard[x][y][z];
-              for (const [dx, dy, dz] of directions) {
+      for (let z = 0; z < boardSize; z++) {
+        for (let x = 0; x < boardSize; x++) {
+          for (let y = 0; y < boardSize; y++) {
+            if (gameBoard[z][x][y]) {
+              const symbol = gameBoard[z][x][y];
+              for (const [dz, dx, dy] of directions) {
                 let count = 0;
                 let cells = [];
                 for (let i = 0; i < 4; i++) {
+                  const nz = z + dz * i;
                   const nx = x + dx * i;
                   const ny = y + dy * i;
-                  const nz = z + dz * i;
-                  if (nx < 0 || nx >= boardSize || ny < 0 || ny >= boardSize || nz < 0 || nz >= boardSize) break;
-                  if (gameBoard[nx][ny][nz] === symbol) {
+                  if (nz < 0 || nz >= boardSize || nx < 0 || nx >= boardSize || ny < 0 || ny >= boardSize)
+                    break;
+                  if (gameBoard[nz][nx][ny] === symbol) {
                     count++;
-                    cells.push({ x: nx, y: ny, z: nz });
+                    cells.push({ z: nz, x: nx, y: ny });
                   } else break;
                 }
                 if (count === 4) {
@@ -679,8 +667,7 @@
       }
       return false;
     }
-
-    // 勝利セルハイライト
+    // 勝利セルのハイライト
     function highlightWinningCells() {
       winningCells.forEach((cellPos, index) => {
         setTimeout(() => {
@@ -690,12 +677,10 @@
         }, 100 * index);
       });
     }
-
     function showWinScreen() {
       const winScreen = document.getElementById('winScreen');
       const winnerIcon = document.getElementById('winnerIcon');
       const winMessage = document.getElementById('winMessage');
-      
       document.querySelector('.win-message h2').textContent = '勝利！';
       winnerIcon.textContent = currentPlayer;
       winnerIcon.className = 'winner-icon';
@@ -703,12 +688,10 @@
       winMessage.textContent = `プレイヤー ${currentPlayer} の勝利です！`;
       winScreen.classList.add('active');
     }
-
     function showDrawScreen() {
       const winScreen = document.getElementById('winScreen');
       const winnerIcon = document.getElementById('winnerIcon');
       const winMessage = document.getElementById('winMessage');
-      
       document.querySelector('.win-message h2').textContent = 'DRAW';
       winnerIcon.textContent = '〇✕';
       winnerIcon.className = 'winner-icon';
@@ -719,8 +702,7 @@
       winMessage.textContent = '勝者はいません。もう一度挑戦しましょう！';
       winScreen.classList.add('active');
     }
-
-    // キーボード操作対応
+    // キーボード操作（Enter/Spaceでセルを選択）
     document.addEventListener('keydown', function(e) {
       if (!gameActive) return;
       if (e.key === 'Enter' || e.key === ' ') {
