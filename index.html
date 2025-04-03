@@ -250,10 +250,10 @@
       transform: translateY(-5px) rotateX(5deg);
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
-    /* 盤面：幅は90vwのうち max-width を設定、aspect-ratio で正方形に */
+    /* 盤面はスマホ向けにやや小さめに設定 */
     .board {
       width: 90vw;
-      max-width: 350px;
+      max-width: 300px;
       aspect-ratio: 1 / 1;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -275,7 +275,7 @@
       opacity: 0.05;
       z-index: -1;
     }
-    /* セルは自動で正方形に（aspect-ratio プロパティ） */
+    /* セルは自動で正方形に保ち、フォントサイズも相対的に設定 */
     .cell {
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.1);
@@ -283,7 +283,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 5vw;
+      font-size: 4.5vw;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.25s cubic-bezier(0.17,0.67,0.83,0.67);
@@ -408,7 +408,7 @@
       margin-bottom: 20px;
       opacity: 0.9;
     }
-    /* メディアクエリ：スマホ向けにさらに調整 */
+    /* メディアクエリ：スマホ向け微調整 */
     @media (max-width: 480px) {
       #titleScreen h1 {
         font-size: 3em;
