@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OXGame3D - 4×4×4 〇✕ゲーム</title>
+  <title>OXGame3D</title>
   <style>
     :root {
       --primary-color: #6200ea;
@@ -15,7 +15,6 @@
       --x-color: #ff1744;
       --win-color: #00c853;
       --text-light: #ffffff;
-      --text-dark: #121212;
       --border-radius: 12px;
       --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.1);
       --shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.25);
@@ -38,13 +37,10 @@
       font-family: 'Orbitron', sans-serif;
       background: var(--dark-bg);
       color: var(--text-light);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow-x: hidden;
       padding: 20px;
-      perspective: 1000px;
+      /* 背景は固定 */
+      position: relative;
+      min-height: 100vh;
     }
 
     /* 3D背景アニメーション */
@@ -78,20 +74,18 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* 画面切替用 */
+    /* 画面切替用 ※position: fixed を解除して通常フローに */
     .screen {
       width: 100%;
       max-width: 1000px;
-      height: 100%;
-      position: fixed;
-      top: 0;
-      left: 0;
+      margin: 40px auto; /* 上下に余白を持たせる */
+      padding: 20px;
+      min-height: calc(100vh - 80px);
       display: none;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       transition: all 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-      z-index: 10;
     }
     .screen.active {
       display: flex;
@@ -168,43 +162,30 @@
     .glowing-btn:hover::before {
       left: 100%;
     }
-    .title-description {
-      margin-top: 40px;
-      font-size: 1.2em;
-      line-height: 1.6;
-      max-width: 80%;
-      opacity: 0.9;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 20px;
-      border-radius: var(--border-radius);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
 
     /* ゲーム画面 */
     #gameScreen {
-      width: 95%;
+      width: 100%;
       max-width: 900px;
-      padding: 30px;
-      box-sizing: border-box;
+      padding: 20px;
       background: var(--surface-color);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-strong);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      overflow-y: auto;
-      margin: 0 auto;
       transform-style: preserve-3d;
     }
     .game-info {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       padding: 15px;
       background: rgba(255, 255, 255, 0.05);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-subtle);
       position: relative;
       border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
     }
     .game-info::before {
       content: '';
@@ -227,13 +208,10 @@
       align-items: center;
       width: 45px;
       height: 45px;
-      line-height: 45px;
-      text-align: center;
       border-radius: 50%;
       margin-right: 15px;
       font-size: 24px;
       transition: all var(--transition-time) ease;
-      position: relative;
     }
     .player-o {
       background-color: var(--o-color);
@@ -254,34 +232,24 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* レイヤーラベルと盤面 */
+    /* 盤面とレイヤーラベル */
     .layer-label {
       font-weight: bold;
-      margin: 10px 0;
+      margin-bottom: 8px;
       color: var(--secondary-color);
       font-size: 1.2em;
       text-transform: uppercase;
       letter-spacing: 2px;
-      display: flex;
-      align-items: center;
-    }
-    .layer-label::before {
-      content: '';
-      display: inline-block;
-      height: 2px;
-      width: 30px;
-      background: var(--secondary-color);
-      margin-right: 10px;
     }
     .board-container {
       display: flex;
       flex-direction: column;
-      gap: 40px;
-      perspective: 1000px;
+      gap: 30px;
+      width: 100%;
     }
     .board-wrapper {
       background: rgba(255, 255, 255, 0.05);
-      padding: 20px;
+      padding: 15px;
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-subtle);
       transition: all var(--transition-time) ease;
@@ -295,13 +263,12 @@
     .board {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      padding: 15px;
+      gap: 8px;
+      padding: 10px;
       background: rgba(0, 0, 0, 0.3);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-subtle);
       position: relative;
-      z-index: 1;
     }
     .board::before {
       content: '';
@@ -316,15 +283,15 @@
       z-index: -1;
     }
     .cell {
-      width: 65px;
-      height: 65px;
+      width: 60px;
+      height: 60px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 32px;
+      font-size: 28px;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.25s cubic-bezier(0.17, 0.67, 0.83, 0.67);
@@ -377,11 +344,12 @@
     .controls {
       display: flex;
       justify-content: center;
-      margin-top: 30px;
-      gap: 20px;
+      margin-top: 20px;
+      gap: 15px;
+      flex-wrap: wrap;
     }
     .control-btn {
-      padding: 12px 25px;
+      padding: 10px 20px;
       font-size: 1.2em;
       font-weight: bold;
       border: none;
@@ -409,27 +377,29 @@
     /* 勝利画面 */
     #winScreen {
       background: rgba(0, 0, 0, 0.85);
-      z-index: 20;
       backdrop-filter: blur(10px);
+      width: 100%;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
     }
     .win-message {
       background: var(--surface-color);
-      padding: 40px;
+      padding: 30px;
       border-radius: var(--border-radius);
       text-align: center;
-      max-width: 80%;
+      max-width: 100%;
       box-shadow: var(--shadow-strong);
       border: 1px solid rgba(255, 255, 255, 0.1);
       animation: appear 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-      transform-style: preserve-3d;
     }
     @keyframes appear {
       0% { transform: scale(0.8) translateY(50px); opacity: 0; }
       100% { transform: scale(1) translateY(0); opacity: 1; }
     }
     .win-message h2 {
-      font-size: 3em;
-      margin-bottom: 30px;
+      font-size: 2.8em;
+      margin-bottom: 20px;
       background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
       -webkit-background-clip: text;
       background-clip: text;
@@ -437,10 +407,9 @@
       letter-spacing: 3px;
     }
     .winner-icon {
-      font-size: 7em;
+      font-size: 5em;
       margin: 20px 0;
       animation: winner-glow 2s infinite;
-      position: relative;
     }
     @keyframes winner-glow {
       0%, 100% { text-shadow: 0 0 20px currentColor; transform: scale(1); }
@@ -448,51 +417,45 @@
     }
     .win-message p {
       font-size: 1.5em;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       opacity: 0.9;
     }
 
     /* レスポンシブ対応 */
     @media (max-width: 768px) {
-      .cell {
-        width: 55px;
-        height: 55px;
-        font-size: 28px;
+      #titleScreen h1 {
+        font-size: 3.8em;
+      }
+      .glowing-btn {
+        padding: 14px 40px;
+        font-size: 1.3em;
       }
       .game-info {
         flex-direction: column;
-        gap: 15px;
-      }
-      #titleScreen h1 {
-        font-size: 3.5em;
-      }
-    }
-    @media (max-width: 480px) {
-      .cell {
-        width: 42px;
-        height: 42px;
-        font-size: 22px;
+        gap: 10px;
       }
       .board {
         gap: 6px;
-        padding: 10px;
+        padding: 8px;
       }
-      .board-container {
-        gap: 25px;
+      .cell {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
       }
-      .controls {
-        flex-direction: column;
-        gap: 15px;
-      }
-      .control-btn {
-        width: 100%;
-      }
+    }
+    @media (max-width: 480px) {
       #titleScreen h1 {
-        font-size: 2.5em;
+        font-size: 3em;
       }
       .glowing-btn {
         padding: 12px 30px;
         font-size: 1.2em;
+      }
+      .cell {
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
       }
     }
   </style>
@@ -505,9 +468,6 @@
     <div class="title-container">
       <h1>OXGame3D</h1>
       <button class="glowing-btn" onclick="startGame()">PLAY</button>
-      <div class="title-description">
-        <p>4×4×4の立体的な三目並べゲーム。<br>縦・横・斜め、どの方向でも4つ揃えると勝利！</p>
-      </div>
     </div>
   </div>
 
@@ -557,7 +517,7 @@
       );
     }
 
-    // ゲーム開始時の画面切替
+    // 画面切替＆ゲーム開始
     function startGame() {
       document.getElementById('titleScreen').classList.remove('active');
       document.getElementById('gameScreen').classList.add('active');
@@ -618,14 +578,13 @@
       }
     }
 
-    // プレイヤーの手を処理
+    // プレイヤーの手処理
     function makeMove(x, y, z) {
       if (!gameActive || gameBoard[x][y][z]) return;
       
       gameBoard[x][y][z] = currentPlayer;
       moveCount++;
       
-      // 手を打ったセルにエフェクト
       const board = document.querySelector(`.board[data-layer="${z}"]`);
       const cell = board.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-z="${z}"]`);
       cell.style.transform = 'scale(1.2)';
@@ -659,7 +618,7 @@
       document.getElementById('moveCount').textContent = `手数: ${moveCount}`;
     }
 
-    // ゲーム盤面の表示更新
+    // 盤面更新
     function updateBoard() {
       const boards = document.querySelectorAll('.board');
       boards.forEach((board) => {
@@ -681,14 +640,14 @@
       });
     }
 
-    // 勝利判定（各方向をチェック）
+    // 勝利判定
     function checkWin() {
       const directions = [
-        [1, 0, 0], [0, 1, 0],     // 盤面内の水平・垂直
-        [0, 0, 1],                // レイヤー間の垂直
-        [1, 1, 0], [1, -1, 0],     // 盤面内の対角線
-        [1, 0, 1], [0, 1, 1],      // レイヤーを跨ぐ直線
-        [1, 1, 1], [1, -1, 1], [-1, 1, 1], [-1, -1, 1]  // 立体対角線
+        [1, 0, 0], [0, 1, 0],
+        [0, 0, 1],
+        [1, 1, 0], [1, -1, 0],
+        [1, 0, 1], [0, 1, 1],
+        [1, 1, 1], [1, -1, 1], [-1, 1, 1], [-1, -1, 1]
       ];
 
       for (let x = 0; x < boardSize; x++) {
@@ -703,15 +662,11 @@
                   const nx = x + dx * i;
                   const ny = y + dy * i;
                   const nz = z + dz * i;
-                  if (nx < 0 || nx >= boardSize || ny < 0 || ny >= boardSize || nz < 0 || nz >= boardSize) {
-                    break;
-                  }
+                  if (nx < 0 || nx >= boardSize || ny < 0 || ny >= boardSize || nz < 0 || nz >= boardSize) break;
                   if (gameBoard[nx][ny][nz] === symbol) {
                     count++;
-                    cells.push({x: nx, y: ny, z: nz});
-                  } else {
-                    break;
-                  }
+                    cells.push({ x: nx, y: ny, z: nz });
+                  } else break;
                 }
                 if (count === 4) {
                   winningCells = cells;
@@ -725,7 +680,7 @@
       return false;
     }
 
-    // 勝利セルを順次ハイライト
+    // 勝利セルハイライト
     function highlightWinningCells() {
       winningCells.forEach((cellPos, index) => {
         setTimeout(() => {
@@ -745,7 +700,6 @@
       winnerIcon.textContent = currentPlayer;
       winnerIcon.className = 'winner-icon';
       winnerIcon.classList.add(currentPlayer === '〇' ? 'player-o' : 'player-x');
-      
       winMessage.textContent = `プレイヤー ${currentPlayer} の勝利です！`;
       winScreen.classList.add('active');
     }
@@ -762,12 +716,11 @@
       winnerIcon.style.webkitBackgroundClip = 'text';
       winnerIcon.style.backgroundClip = 'text';
       winnerIcon.style.webkitTextFillColor = 'transparent';
-      
       winMessage.textContent = '勝者はいません。もう一度挑戦しましょう！';
       winScreen.classList.add('active');
     }
 
-    // キーボード操作でセルを選択できるようにする（Enter/Spaceで反応）
+    // キーボード操作対応
     document.addEventListener('keydown', function(e) {
       if (!gameActive) return;
       if (e.key === 'Enter' || e.key === ' ') {
