@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OXGame3D - 4×4×4 〇✕ゲーム</title>
+  <style>
+    :root {
+      --primary-color: #6200ea;
+      --secondary-color: #00b0ff;
+      --accent-color: #ff1744;
+      --dark-bg: #121212;
+      --surface-color: #1e1e1e;
+      --o-color: #00b0ff;
+      --x-color: #ff1744;
+      --win-color: #00c853;
+      --text-light: #ffffff;
+      --text-dark: #121212;
+      --border-radius: 12px;
+      --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.25);
+      --transition-time: 0.3s;
+    }
+
+    @font-face {
+      font-family: 'Orbitron';
+      src: url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+      font-display: swap;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 20px;
+      perspective: 1000px;
+    }
+
+    /* 3D背景アニメーション */
+    .background-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+    .background-animation::before,
+    .background-animation::after {
+      content: '';
+      position: absolute;
+      width: 300vw;
+      height: 300vh;
+      top: -100vh;
+      left: -100vw;
+      background: radial-gradient(circle, transparent 20%, var(--dark-bg) 70%);
+      animation: rotate 60s linear infinite;
+    }
+    .background-animation::after {
+      background: linear-gradient(45deg, var(--primary-color) 0%, transparent 70%);
+      opacity: 0.05;
+      animation-duration: 80s;
+    }
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* 画面切替用 */
+    .screen {
+      width: 100%;
+      max-width: 1000px;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+      z-index: 10;
+    }
+    .screen.active {
+      display: flex;
+    }
+
+    /* タイトル画面 */
+    #titleScreen {
+      background: transparent;
+      text-align: center;
+      border-radius: var(--border-radius);
+    }
+    .title-container {
+      transform-style: preserve-3d;
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotateY(0); }
+      50% { transform: translateY(-20px) rotateY(5deg); }
+    }
+    #titleScreen h1 {
+      font-size: 5em;
+      font-weight: bold;
+      margin-bottom: 40px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 5px 15px rgba(98, 0, 234, 0.3);
+      position: relative;
+      letter-spacing: 3px;
+    }
+    #titleScreen h1::after {
+      content: "3D";
+      position: absolute;
+      bottom: -15px;
+      right: -15px;
+      font-size: 0.4em;
+      background: var(--accent-color);
+      color: var(--text-light);
+      padding: 5px 10px;
+      border-radius: 8px;
+      transform: rotate(10deg);
+    }
+    .glowing-btn {
+      padding: 16px 60px;
+      font-size: 1.5em;
+      font-weight: bold;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: var(--text-light);
+      box-shadow: 0 0 15px var(--primary-color), 0 0 30px rgba(98, 0, 234, 0.5);
+      transition: all var(--transition-time) ease;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 2px;
+      margin: 15px 0;
+    }
+    .glowing-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+    .glowing-btn:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 0 20px var(--primary-color), 0 0 40px rgba(98, 0, 234, 0.7);
+    }
+    .glowing-btn:hover::before {
+      left: 100%;
+    }
+    .title-description {
+      margin-top: 40px;
+      font-size: 1.2em;
+      line-height: 1.6;
+      max-width: 80%;
+      opacity: 0.9;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* ゲーム画面 */
+    #gameScreen {
+      width: 95%;
+      max-width: 900px;
+      padding: 30px;
+      box-sizing: border-box;
+      background: var(--surface-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-strong);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow-y: auto;
+      margin: 0 auto;
+      transform-style: preserve-3d;
+    }
+    .game-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-subtle);
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .game-info::before {
+      content: '';
+      position: absolute;
+      width: 50%;
+      height: 2px;
+      bottom: -1px;
+      left: 25%;
+      background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+    }
+    .player-turn {
+      display: flex;
+      align-items: center;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    .player-icon {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 45px;
+      height: 45px;
+      line-height: 45px;
+      text-align: center;
+      border-radius: 50%;
+      margin-right: 15px;
+      font-size: 24px;
+      transition: all var(--transition-time) ease;
+      position: relative;
+    }
+    .player-o {
+      background-color: var(--o-color);
+      color: var(--text-light);
+      box-shadow: 0 0 15px var(--o-color);
+    }
+    .player-x {
+      background-color: var(--x-color);
+      color: var(--text-light);
+      box-shadow: 0 0 15px var(--x-color);
+    }
+    #moveCount {
+      font-size: 1.2em;
+      font-weight: bold;
+      padding: 8px 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* レイヤーラベルと盤面 */
+    .layer-label {
+      font-weight: bold;
+      margin: 10px 0;
+      color: var(--secondary-color);
+      font-size: 1.2em;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+    }
+    .layer-label::before {
+      content: '';
+      display: inline-block;
+      height: 2px;
+      width: 30px;
+      background: var(--secondary-color);
+      margin-right: 10px;
+    }
+    .board-container {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      perspective: 1000px;
+    }
+    .board-wrapper {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-subtle);
+      transition: all var(--transition-time) ease;
+      transform-style: preserve-3d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .board-wrapper:hover {
+      transform: translateY(-5px) rotateX(5deg);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-subtle);
+      position: relative;
+      z-index: 1;
+    }
+    .board::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: var(--border-radius);
+      background: linear-gradient(135deg, var(--primary-color), transparent);
+      opacity: 0.05;
+      z-index: -1;
+    }
+    .cell {
+      width: 65px;
+      height: 65px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 32px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+      position: relative;
+      overflow: hidden;
+    }
+    .cell::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .cell:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .cell:hover::after {
+      opacity: 1;
+    }
+    .cell.o {
+      color: var(--o-color);
+      text-shadow: 0 0 10px var(--o-color);
+    }
+    .cell.x {
+      color: var(--x-color);
+      text-shadow: 0 0 10px var(--x-color);
+    }
+    .cell.winning {
+      background-color: var(--win-color);
+      color: var(--text-light);
+      animation: winning-pulse 1.5s infinite;
+      box-shadow: 0 0 15px var(--win-color);
+    }
+    @keyframes winning-pulse {
+      0% { transform: scale(1); box-shadow: 0 0 15px var(--win-color); }
+      50% { transform: scale(1.1); box-shadow: 0 0 30px var(--win-color); }
+      100% { transform: scale(1); box-shadow: 0 0 15px var(--win-color); }
+    }
+    .taken {
+      pointer-events: none;
+    }
+
+    /* 制御ボタン */
+    .controls {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+      gap: 20px;
+    }
+    .control-btn {
+      padding: 12px 25px;
+      font-size: 1.2em;
+      font-weight: bold;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-light);
+      box-shadow: var(--shadow-subtle);
+      transition: all var(--transition-time) ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      letter-spacing: 1px;
+    }
+    .control-btn:hover {
+      background: var(--primary-color);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(98, 0, 234, 0.5);
+    }
+    .reset-btn {
+      border-left: 3px solid var(--secondary-color);
+    }
+    .title-btn {
+      border-left: 3px solid var(--accent-color);
+    }
+
+    /* 勝利画面 */
+    #winScreen {
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 20;
+      backdrop-filter: blur(10px);
+    }
+    .win-message {
+      background: var(--surface-color);
+      padding: 40px;
+      border-radius: var(--border-radius);
+      text-align: center;
+      max-width: 80%;
+      box-shadow: var(--shadow-strong);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: appear 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+      transform-style: preserve-3d;
+    }
+    @keyframes appear {
+      0% { transform: scale(0.8) translateY(50px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .win-message h2 {
+      font-size: 3em;
+      margin-bottom: 30px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 3px;
+    }
+    .winner-icon {
+      font-size: 7em;
+      margin: 20px 0;
+      animation: winner-glow 2s infinite;
+      position: relative;
+    }
+    @keyframes winner-glow {
+      0%, 100% { text-shadow: 0 0 20px currentColor; transform: scale(1); }
+      50% { text-shadow: 0 0 40px currentColor, 0 0 60px currentColor; transform: scale(1.1); }
+    }
+    .win-message p {
+      font-size: 1.5em;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 768px) {
+      .cell {
+        width: 55px;
+        height: 55px;
+        font-size: 28px;
+      }
+      .game-info {
+        flex-direction: column;
+        gap: 15px;
+      }
+      #titleScreen h1 {
+        font-size: 3.5em;
+      }
+    }
+    @media (max-width: 480px) {
+      .cell {
+        width: 42px;
+        height: 42px;
+        font-size: 22px;
+      }
+      .board {
+        gap: 6px;
+        padding: 10px;
+      }
+      .board-container {
+        gap: 25px;
+      }
+      .controls {
+        flex-direction: column;
+        gap: 15px;
+      }
+      .control-btn {
+        width: 100%;
+      }
+      #titleScreen h1 {
+        font-size: 2.5em;
+      }
+      .glowing-btn {
+        padding: 12px 30px;
+        font-size: 1.2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="background-animation"></div>
+  
+  <!-- タイトル画面 -->
+  <div id="titleScreen" class="screen active">
+    <div class="title-container">
+      <h1>OXGame3D</h1>
+      <button class="glowing-btn" onclick="startGame()">PLAY</button>
+      <div class="title-description">
+        <p>4×4×4の立体的な三目並べゲーム。<br>縦・横・斜め、どの方向でも4つ揃えると勝利！</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ゲーム画面 -->
+  <div id="gameScreen" class="screen">
+    <div class="game-info">
+      <div class="player-turn">
+        <span class="player-icon player-o" id="playerIcon">〇</span>
+        <span id="playerTurn">の番です</span>
+      </div>
+      <div id="moveCount">手数: 0</div>
+    </div>
+    
+    <div class="board-container" id="gameArea"></div>
+    
+    <div class="controls">
+      <button class="control-btn reset-btn" onclick="resetGame()">リセット</button>
+      <button class="control-btn title-btn" onclick="backToTitle()">タイトルへ</button>
+    </div>
+  </div>
+
+  <!-- 勝利画面 -->
+  <div id="winScreen" class="screen">
+    <div class="win-message">
+      <h2>勝利！</h2>
+      <div class="winner-icon player-o" id="winnerIcon">〇</div>
+      <p id="winMessage">プレイヤーの勝利です！</p>
+      <button class="glowing-btn" onclick="resetGame()">もう一度プレイ</button>
+      <button class="control-btn title-btn" onclick="backToTitle()">タイトルへ</button>
+    </div>
+  </div>
+
+  <script>
+    const boardSize = 4;
+    let currentPlayer = '〇';
+    let gameBoard;
+    let moveCount = 0;
+    let gameActive = false;
+    let winningCells = [];
+
+    // 空の4×4×4ボードを作成
+    function createEmptyBoard() {
+      return Array.from({ length: boardSize }, () =>
+        Array.from({ length: boardSize }, () =>
+          Array.from({ length: boardSize }, () => null)
+        )
+      );
+    }
+
+    // ゲーム開始時の画面切替
+    function startGame() {
+      document.getElementById('titleScreen').classList.remove('active');
+      document.getElementById('gameScreen').classList.add('active');
+      document.getElementById('winScreen').classList.remove('active');
+      resetGame();
+    }
+
+    function backToTitle() {
+      document.getElementById('gameScreen').classList.remove('active');
+      document.getElementById('winScreen').classList.remove('active');
+      document.getElementById('titleScreen').classList.add('active');
+    }
+
+    function resetGame() {
+      gameBoard = createEmptyBoard();
+      currentPlayer = '〇';
+      moveCount = 0;
+      gameActive = true;
+      winningCells = [];
+      updatePlayerTurn();
+      updateMoveCount();
+      createBoard();
+      document.getElementById('winScreen').classList.remove('active');
+    }
+
+    // 各レイヤーの盤面を作成
+    function createBoard() {
+      const gameArea = document.getElementById('gameArea');
+      gameArea.innerHTML = '';
+      for (let z = 0; z < boardSize; z++) {
+        const boardWrapper = document.createElement('div');
+        boardWrapper.classList.add('board-wrapper');
+        
+        const layerLabel = document.createElement('div');
+        layerLabel.classList.add('layer-label');
+        layerLabel.textContent = `LAYER ${z + 1}`;
+        boardWrapper.appendChild(layerLabel);
+        
+        const board = document.createElement('div');
+        board.classList.add('board');
+        board.setAttribute('data-layer', z);
+        
+        for (let x = 0; x < boardSize; x++) {
+          for (let y = 0; y < boardSize; y++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.setAttribute('data-x', x);
+            cell.setAttribute('data-y', y);
+            cell.setAttribute('data-z', z);
+            cell.setAttribute('aria-label', `位置 x:${x+1}, y:${y+1}, z:${z+1}`);
+            cell.addEventListener('click', () => makeMove(x, y, z));
+            board.appendChild(cell);
+          }
+        }
+        
+        boardWrapper.appendChild(board);
+        gameArea.appendChild(boardWrapper);
+      }
+    }
+
+    // プレイヤーの手を処理
+    function makeMove(x, y, z) {
+      if (!gameActive || gameBoard[x][y][z]) return;
+      
+      gameBoard[x][y][z] = currentPlayer;
+      moveCount++;
+      
+      // 手を打ったセルにエフェクト
+      const board = document.querySelector(`.board[data-layer="${z}"]`);
+      const cell = board.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-z="${z}"]`);
+      cell.style.transform = 'scale(1.2)';
+      setTimeout(() => {
+        cell.style.transform = 'scale(1)';
+      }, 200);
+      
+      updateBoard();
+      updateMoveCount();
+      
+      if (checkWin()) {
+        gameActive = false;
+        highlightWinningCells();
+        setTimeout(showWinScreen, 800);
+      } else if (moveCount >= boardSize * boardSize * boardSize) {
+        showDrawScreen();
+      } else {
+        currentPlayer = currentPlayer === '〇' ? '✕' : '〇';
+        updatePlayerTurn();
+      }
+    }
+
+    function updatePlayerTurn() {
+      const playerIcon = document.getElementById('playerIcon');
+      playerIcon.textContent = currentPlayer;
+      playerIcon.className = 'player-icon';
+      playerIcon.classList.add(currentPlayer === '〇' ? 'player-o' : 'player-x');
+    }
+
+    function updateMoveCount() {
+      document.getElementById('moveCount').textContent = `手数: ${moveCount}`;
+    }
+
+    // ゲーム盤面の表示更新
+    function updateBoard() {
+      const boards = document.querySelectorAll('.board');
+      boards.forEach((board) => {
+        const z = parseInt(board.getAttribute('data-layer'));
+        const cells = board.querySelectorAll('.cell');
+        let index = 0;
+        for (let x = 0; x < boardSize; x++) {
+          for (let y = 0; y < boardSize; y++) {
+            const cell = cells[index++];
+            const value = gameBoard[x][y][z];
+            cell.textContent = value || '';
+            cell.classList.remove('o', 'x', 'taken', 'winning');
+            if (value) {
+              cell.classList.add('taken');
+              cell.classList.add(value === '〇' ? 'o' : 'x');
+            }
+          }
+        }
+      });
+    }
+
+    // 勝利判定（各方向をチェック）
+    function checkWin() {
+      const directions = [
+        [1, 0, 0], [0, 1, 0],     // 盤面内の水平・垂直
+        [0, 0, 1],                // レイヤー間の垂直
+        [1, 1, 0], [1, -1, 0],     // 盤面内の対角線
+        [1, 0, 1], [0, 1, 1],      // レイヤーを跨ぐ直線
+        [1, 1, 1], [1, -1, 1], [-1, 1, 1], [-1, -1, 1]  // 立体対角線
+      ];
+
+      for (let x = 0; x < boardSize; x++) {
+        for (let y = 0; y < boardSize; y++) {
+          for (let z = 0; z < boardSize; z++) {
+            if (gameBoard[x][y][z]) {
+              const symbol = gameBoard[x][y][z];
+              for (const [dx, dy, dz] of directions) {
+                let count = 0;
+                let cells = [];
+                for (let i = 0; i < 4; i++) {
+                  const nx = x + dx * i;
+                  const ny = y + dy * i;
+                  const nz = z + dz * i;
+                  if (nx < 0 || nx >= boardSize || ny < 0 || ny >= boardSize || nz < 0 || nz >= boardSize) {
+                    break;
+                  }
+                  if (gameBoard[nx][ny][nz] === symbol) {
+                    count++;
+                    cells.push({x: nx, y: ny, z: nz});
+                  } else {
+                    break;
+                  }
+                }
+                if (count === 4) {
+                  winningCells = cells;
+                  return true;
+                }
+              }
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    // 勝利セルを順次ハイライト
+    function highlightWinningCells() {
+      winningCells.forEach((cellPos, index) => {
+        setTimeout(() => {
+          const board = document.querySelector(`.board[data-layer="${cellPos.z}"]`);
+          const cell = board.querySelector(`.cell[data-x="${cellPos.x}"][data-y="${cellPos.y}"][data-z="${cellPos.z}"]`);
+          cell.classList.add('winning');
+        }, 100 * index);
+      });
+    }
+
+    function showWinScreen() {
+      const winScreen = document.getElementById('winScreen');
+      const winnerIcon = document.getElementById('winnerIcon');
+      const winMessage = document.getElementById('winMessage');
+      
+      document.querySelector('.win-message h2').textContent = '勝利！';
+      winnerIcon.textContent = currentPlayer;
+      winnerIcon.className = 'winner-icon';
+      winnerIcon.classList.add(currentPlayer === '〇' ? 'player-o' : 'player-x');
+      
+      winMessage.textContent = `プレイヤー ${currentPlayer} の勝利です！`;
+      winScreen.classList.add('active');
+    }
+
+    function showDrawScreen() {
+      const winScreen = document.getElementById('winScreen');
+      const winnerIcon = document.getElementById('winnerIcon');
+      const winMessage = document.getElementById('winMessage');
+      
+      document.querySelector('.win-message h2').textContent = 'DRAW';
+      winnerIcon.textContent = '〇✕';
+      winnerIcon.className = 'winner-icon';
+      winnerIcon.style.background = 'linear-gradient(135deg, var(--o-color), var(--x-color))';
+      winnerIcon.style.webkitBackgroundClip = 'text';
+      winnerIcon.style.backgroundClip = 'text';
+      winnerIcon.style.webkitTextFillColor = 'transparent';
+      
+      winMessage.textContent = '勝者はいません。もう一度挑戦しましょう！';
+      winScreen.classList.add('active');
+    }
+
+    // キーボード操作でセルを選択できるようにする（Enter/Spaceで反応）
+    document.addEventListener('keydown', function(e) {
+      if (!gameActive) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        const focused = document.activeElement;
+        if (focused && focused.classList.contains('cell')) {
+          const x = parseInt(focused.getAttribute('data-x'));
+          const y = parseInt(focused.getAttribute('data-y'));
+          const z = parseInt(focused.getAttribute('data-z'));
+          makeMove(x, y, z);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
